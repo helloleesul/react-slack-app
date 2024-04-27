@@ -1,9 +1,13 @@
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import app from "../../firebase";
 
 const RegisterPage = () => {
+  const auth = getAuth(app);
   const [loading, setLoading] = useState(false);
+  const [errorFromSubmit, setErrorFromSubmit] = useState("");
 
   const {
     register,
@@ -12,8 +16,24 @@ const RegisterPage = () => {
     handleSubmit,
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log("🚀 ~ RegisterPage ~ data:", data);
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
+      const createdUser = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
+      console.log("🚀 ~ RegisterPage ~ data:", createdUser);
+    } catch (error) {
+      console.log(error);
+      setErrorFromSubmit(error.message);
+      setTimeout(() => {
+        setErrorFromSubmit("");
+      }, 3000);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,6 +78,8 @@ const RegisterPage = () => {
         {errors.password && errors.password.type === "minLength" && (
           <p>Password must have at least 6 characters</p>
         )}
+
+        {errorFromSubmit && <p>{errorFromSubmit}</p>}
 
         <input type="submit" disabled={loading} />
         <Link to={"/login"} style={{ color: "gray", textDecoration: "none" }}>
