@@ -3,10 +3,12 @@ import {
   getAuth,
   updateProfile,
 } from "firebase/auth";
+import { ref, set } from "firebase/database";
+
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import app from "../../firebase";
+import app, { db } from "../../firebase";
 import md5 from "md5";
 
 const RegisterPage = () => {
@@ -34,6 +36,10 @@ const RegisterPage = () => {
         photoURL: `http://gravatar.com/avatar/${md5(
           createdUser.user.email
         )}?d=identicon`,
+      });
+      set(ref(db, `users/${createdUser.user.uid}`), {
+        name: createdUser.user.displayName,
+        image: createdUser.user.photoURL,
       });
       console.log("🚀 ~ createdUser ~ data:", createdUser);
       console.log("🚀 ~ updatedUser ~ data:", auth.currentUser);
