@@ -18,25 +18,29 @@ const RegisterPage = () => {
 
   const {
     register,
-    watch,
+    // watch,
     formState: { errors },
     handleSubmit,
   } = useForm();
 
   const onSubmit = async (data) => {
     try {
+      // 중복 호출 제어
       setLoading(true);
+      // email, password 생성
       const createdUser = await createUserWithEmailAndPassword(
         auth,
         data.email,
         data.password
       );
+      // 유저 정보 추가
       await updateProfile(auth.currentUser, {
         displayName: data.name,
         photoURL: `http://gravatar.com/avatar/${md5(
           createdUser.user.email
         )}?d=identicon`,
       });
+      // Realtime Database 유저정보 저장
       set(ref(db, `users/${createdUser.user.uid}`), {
         name: createdUser.user.displayName,
         image: createdUser.user.photoURL,
